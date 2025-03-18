@@ -1,0 +1,17 @@
+services:
+  - name: mataabackend
+    type: web
+    runtime: node
+    env: node
+    region: oregon # Change if needed
+    plan: free # Use "starter" for paid plans
+    branch: main
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
