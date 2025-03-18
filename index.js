@@ -187,8 +187,86 @@ app.put("/api/products/:id", async (req, res) => {
     }
   });
   
+  const createDefaultSuperAdmin = async () => {
+    const existingSuperAdmin = await Admin.findOne({ email: "admin@gmail.com" });
+    if (!existingSuperAdmin) {
+      const superAdmin = new Admin({
+        email: "admin@gmail.com",
+        password: "MataaGariVenturesLimited@2025",
+        role: "super_admin",
+      });
+      await superAdmin.save();
+      console.log("Default super admin created.");
+    } else {
+      console.log("Super admin already exists.");
+    }
+  };
   
+  const verifySuperAdmin = async (req, res, next) => {
+    try {
+      const token = req.headers.authorization?.split(" ")[1];
+      if (!token) return res.status(403).json({ error: "Access denied" });
   
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const admin = await Admin.findById(decoded.id);
+  
+      if (!admin || admin.role !== "superadmin") {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+  
+      req.admin = admin; // Attach admin to request
+      next();
+    } catch (error) {
+      res.status(403).json({ error: "Invalid or expired token" });
+    }
+  };
+  app.post("/api/admins/add", verifySuperAdmin, async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
+  
+      const existingAdmin = await Admin.findOne({ email });
+      if (existingAdmin) return res.status(400).json({ error: "Admin already exists" });
+  
+      const hashedPassword = await bcrypt.hash(password, 10);
+  
+      const newAdmin = new Admin({
+        email,
+        password: hashedPassword,
+        role: "admin",
+      });
+  
+      await newAdmin.save();
+      res.status(201).json({ message: "Admin added successfully" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+  
+
+
+  app.post("/api/admins", async (req, res) => {
+    try {
+      const { email, password, role } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+      }
+  
+      // Check if admin exists
+      const existingAdmin = await Admin.findOne({ email });
+      if (existingAdmin) {
+        return res.status(400).json({ error: "Admin already exists" });
+      }
+  
+      // Create new admin
+      const newAdmin = new Admin({ email, password, role: role || "admin" });
+      await newAdmin.save();
+  
+      res.status(201).json({ success: true, message: "Admin added successfully", admin: newAdmin });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
   
 
 // ✅ Default Route to Avoid "Cannot GET /"
