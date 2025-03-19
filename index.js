@@ -50,15 +50,15 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     if (!req.file) return res.status(400).json({ error: "No image uploaded" });
 
     // Validate required fields
-    const { make, model, year } = req.body;
-    if (!make || !model || !year) {
-      return res.status(400).json({ error: "Make, model, and year are required" });
+    const { name, make, model, year, price } = req.body;
+    if (!name || !make || !model || !year || !price) {
+      return res.status(400).json({ error: "Name, make, model, year, and price are required" });
     }
 
-    // Check if a product with the same make, model, and year already exists
-    const existingProduct = await Product.findOne({ make, model, year });
+    // Check if a product with the same name already exists
+    const existingProduct = await Product.findOne({ name });
     if (existingProduct) {
-      return res.status(400).json({ error: "Product with the same make, model, and year already exists" });
+      return res.status(400).json({ error: "A product with the same name already exists" });
     }
 
     // Upload image to Cloudinary
@@ -75,9 +75,11 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
     // Save new product
     const newProduct = new Product({
+      name,   // ✅ Include name
       make,
       model,
       year,
+      price,
       imageUrl: result.secure_url,
     });
 
@@ -87,6 +89,8 @@ app.post("/upload", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
   
 

@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const ProductSchema = new mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     make: {
       type: String,
       required: true,
@@ -13,8 +18,6 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      enum: ["Corolla", "Civic", "Xtrail", "Demio", "Forester", "Lancer"],
-      set: (value) => value.charAt(0).toUpperCase() + value.slice(1).toLowerCase(), // Fix case sensitivity
     },
     year: {
       type: Number,
@@ -25,6 +28,10 @@ const ProductSchema = new mongoose.Schema(
         validator: Number.isInteger,
         message: "{VALUE} is not a valid year. Year must be an integer.",
       },
+    },
+    price: {
+      type: Number,
+      required: true,
     },
     imageUrl: {
       type: String,
