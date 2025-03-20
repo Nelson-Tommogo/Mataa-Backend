@@ -29,15 +29,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ✅ Connect to MongoDB with error handling
-mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => {
-    console.error("MongoDB Connection Error:", err);
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => {
+    console.error("❌ MongoDB Connection Error:", err.message);
     process.exit(1);
   });
 
@@ -281,4 +276,3 @@ app.get("/", (req, res) => {
 // ✅ Start the Server
 const serverPort = process.env.PORT || 3000;
 app.listen(serverPort, () => console.log(`Mataa Gari Ventures Server running on port ${serverPort}`));
-
